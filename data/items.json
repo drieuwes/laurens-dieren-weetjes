@@ -1,6 +1,16 @@
 {
   "items": [
     {
+      "id": "ms0hqfq4",
+      "type": "vraag",
+      "titel": "De Giraf",
+      "tekst": "wat gebeurt er als je dicht bij een giraf komt?",
+      "dieren": [],
+      "afbeelding": "",
+      "video": "",
+      "datum": "2026-07-25"
+    },
+    {
       "id": "ms0hlwyg",
       "type": "weetje",
       "titel": "De Olifant",
