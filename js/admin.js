@@ -104,7 +104,7 @@ async function uploadFoto(bestand) {
 async function login() {
   const owner = document.getElementById("in-owner").value.trim();
   const repo = document.getElementById("in-repo").value.trim();
-  const token = document.getElementById("in-token").value.trim();
+  const token = document.getElementById("in-token").value.replace(/\s+/g, "");
   const branch = document.getElementById("in-branch").value.trim() || "main";
   if (!owner || !repo || !token) {
     meld("Vul je gebruikersnaam, de repository én de toegangssleutel in.", "fout");
@@ -114,8 +114,7 @@ async function login() {
   const knop = document.getElementById("knop-login");
   knop.disabled = true;
   try {
-    await github("");           // bestaat de repo en werkt de sleutel?
-    await haalItemsBestand();   // en kunnen we het items-bestand lezen?
+    await haalItemsBestand();   // bestaat de repo, werkt de sleutel, en is het items-bestand leesbaar?
     meldWeg();
     toonDashboard();
   } catch (e) {
