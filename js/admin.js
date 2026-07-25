@@ -22,6 +22,16 @@ function meldWeg() {
   document.getElementById("melding").className = "melding";
 }
 
+/* Maakt van een technische fout een begrijpelijke uitleg. */
+function legFoutUit(e) {
+  if (e instanceof TypeError && /fetch/i.test(e.message)) {
+    return "De browser kon GitHub (api.github.com) niet bereiken. Dit komt bijna altijd " +
+      "door een adblocker, een browserextensie of een virusscanner die het verzoek blokkeert. " +
+      "Probeer het eens in een incognitovenster (Ctrl+Shift+N), of zet je adblocker voor deze site uit.";
+  }
+  return e.message;
+}
+
 /* ---- base64-hulpjes die met emoji's en accenten overweg kunnen ---- */
 function utf8NaarB64(str) {
   const bytes = new TextEncoder().encode(str);
@@ -119,7 +129,7 @@ async function login() {
     toonDashboard();
   } catch (e) {
     localStorage.removeItem(OPSLAG_SLEUTEL);
-    meld(`Inloggen is niet gelukt. Controleer de gegevens. (${e.message})`, "fout");
+    meld(`Inloggen is niet gelukt. ${legFoutUit(e)}`, "fout");
   } finally {
     knop.disabled = false;
   }
@@ -174,7 +184,7 @@ async function verwijderItem(id) {
     meld("Item verwijderd! Het duurt een paar minuten voordat de site is bijgewerkt.");
     ververslijst();
   } catch (e) {
-    meld(`Verwijderen is niet gelukt. (${e.message})`, "fout");
+    meld(`Verwijderen is niet gelukt. ${legFoutUit(e)}`, "fout");
   }
 }
 
@@ -217,7 +227,7 @@ async function opslaan() {
     document.getElementById("nw-foto-bestand").value = "";
     ververslijst();
   } catch (e) {
-    meld(`Opslaan is niet gelukt. (${e.message})`, "fout");
+    meld(`Opslaan is niet gelukt. ${legFoutUit(e)}`, "fout");
   } finally {
     knop.disabled = false;
     knop.textContent = "Opslaan op de site 🚀";
