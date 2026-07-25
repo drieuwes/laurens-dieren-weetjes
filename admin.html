@@ -21,30 +21,64 @@
   <main>
     <div id="melding" class="melding"></div>
 
-    <!-- ===== Inloggen ===== -->
-    <section id="login-paneel" class="beheer-paneel">
+    <!-- ===== Inloggen (terugkerende beheerder) ===== -->
+    <section id="login-paneel" class="beheer-paneel verborgen">
       <h2>🔐 Inloggen</h2>
-      <p>Vul hieronder de gegevens van je GitHub-account in. Hoe je een
-        toegangssleutel (token) maakt, staat in het bestand <strong>README.md</strong>.</p>
       <div class="veld">
-        <label for="in-owner">GitHub gebruikersnaam</label>
-        <input type="text" id="in-owner" placeholder="bijv. laurens123">
+        <label for="in-naam">Gebruikersnaam</label>
+        <input type="text" id="in-naam" autocomplete="username">
       </div>
       <div class="veld">
-        <label for="in-repo">Naam van de repository</label>
-        <input type="text" id="in-repo" placeholder="bijv. laurens-dieren-weetjes">
-      </div>
-      <div class="veld">
-        <label for="in-token">Toegangssleutel (fine-grained token)</label>
-        <input type="password" id="in-token" placeholder="github_pat_…">
-        <div class="hint">De sleutel wordt alleen op déze computer bewaard (in je browser), nergens anders.</div>
-      </div>
-      <div class="veld">
-        <label for="in-branch">Branch</label>
-        <input type="text" id="in-branch" value="main">
-        <div class="hint">Meestal hoef je dit niet te veranderen.</div>
+        <label for="in-ww">Wachtwoord</label>
+        <input type="password" id="in-ww" autocomplete="current-password">
       </div>
       <button class="knop" id="knop-login">Inloggen</button>
+      <p class="hint" style="margin-top:1rem">
+        Wachtwoord vergeten, of log je in op een nieuwe computer?
+        <a href="#" id="link-reset">Stel de beheerpagina opnieuw in</a>
+        (daar heb je de GitHub-toegangssleutel weer voor nodig).
+      </p>
+    </section>
+
+    <!-- ===== Eerste keer instellen ===== -->
+    <section id="setup-paneel" class="beheer-paneel verborgen">
+      <h2>🛠️ Eerste keer instellen</h2>
+      <p>Dit hoef je maar één keer te doen (per computer). Vul de GitHub-gegevens
+        in en kies zelf een gebruikersnaam en wachtwoord. Daarna log je voortaan
+        gewoon in met die naam en dat wachtwoord. Hoe je een toegangssleutel
+        (token) maakt, staat in het bestand <strong>README.md</strong>.</p>
+      <div class="veld">
+        <label for="su-owner">GitHub gebruikersnaam</label>
+        <input type="text" id="su-owner" placeholder="bijv. laurens123">
+      </div>
+      <div class="veld">
+        <label for="su-repo">Naam van de repository</label>
+        <input type="text" id="su-repo" placeholder="bijv. laurens-dieren-weetjes">
+      </div>
+      <div class="veld">
+        <label for="su-token">GitHub-toegangssleutel (fine-grained token)</label>
+        <input type="password" id="su-token" placeholder="github_pat_…">
+        <div class="hint">Wordt versleuteld met je wachtwoord en alleen op déze computer bewaard.</div>
+      </div>
+      <div class="veld">
+        <label for="su-branch">Branch</label>
+        <input type="text" id="su-branch" value="main">
+        <div class="hint">Meestal hoef je dit niet te veranderen.</div>
+      </div>
+      <hr style="border:none;border-top:2px solid #f0eefa;margin:1.2rem 0">
+      <div class="veld">
+        <label for="su-naam">Kies een gebruikersnaam voor het inloggen</label>
+        <input type="text" id="su-naam" placeholder="bijv. laurens" autocomplete="username">
+      </div>
+      <div class="veld">
+        <label for="su-ww1">Kies een wachtwoord (minstens 8 tekens)</label>
+        <input type="password" id="su-ww1" autocomplete="new-password">
+      </div>
+      <div class="veld">
+        <label for="su-ww2">Herhaal het wachtwoord</label>
+        <input type="password" id="su-ww2" autocomplete="new-password">
+      </div>
+      <button class="knop" id="knop-setup">Instellen en inloggen 🚀</button>
     </section>
 
     <!-- ===== Dashboard ===== -->
@@ -101,7 +135,7 @@
 
       <section class="beheer-paneel">
         <h2>🚪 Uitloggen</h2>
-        <p>Hiermee wordt de toegangssleutel van deze computer verwijderd.</p>
+        <p>Tot je weer inlogt met je gebruikersnaam en wachtwoord.</p>
         <button class="knop rood" id="knop-uitloggen">Uitloggen</button>
       </section>
     </div>
@@ -109,7 +143,7 @@
 
   <footer class="site-voet">Laurens' dieren weetjes — beheer</footer>
 
-  <script src="js/app.js?v=3"></script>
-  <script src="js/admin.js?v=3"></script>
+  <script src="js/app.js?v=4"></script>
+  <script src="js/admin.js?v=4"></script>
 </body>
 </html>

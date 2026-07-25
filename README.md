@@ -51,8 +51,17 @@ token**. Zo maak je die:
    - **Permissions** → *Repository permissions* → **Contents**: zet op **Read and write**
 3. Klik op *Generate token* en **kopieer de sleutel meteen** (hij begint met
    `github_pat_`). Je krijgt hem maar één keer te zien.
-4. Ga naar `https://…github.io/…/admin.html`, vul je gebruikersnaam, de naam
-   van de repository en de sleutel in, en klik op **Inloggen**.
+4. Ga naar `https://…github.io/…/admin.html`. De eerste keer zie je
+   **"Eerste keer instellen"**: vul je GitHub-gegevens en de sleutel in, en
+   kies zelf een gebruikersnaam en wachtwoord voor het inloggen.
+5. Klaar! Voortaan log je op deze computer gewoon in met die
+   **gebruikersnaam + wachtwoord**. De GitHub-sleutel wordt versleuteld met je
+   wachtwoord in de browser bewaard; zonder het wachtwoord kan niemand erbij.
+
+> Log je in op een **andere computer**? Dan doe je daar één keer opnieuw de
+> stap "Eerste keer instellen" (met dezelfde GitHub-sleutel of een nieuwe).
+> Wachtwoord vergeten? Klik op "Stel de beheerpagina opnieuw in" en gebruik
+> de GitHub-sleutel opnieuw.
 
 ⚠️ **Belangrijk over de sleutel:**
 - De sleutel wordt alleen in de browser op je eigen computer bewaard.

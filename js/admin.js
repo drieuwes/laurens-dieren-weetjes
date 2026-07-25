@@ -1,13 +1,22 @@
 /* ===== Beheerpagina: praat met de GitHub API om items op te slaan =====
    De site staat op GitHub Pages (alleen bestanden, geen server).
-   Daarom slaat de beheerpagina items op door data/items.json in de
-   repository aan te passen via de GitHub API, met een toegangssleutel
-   (fine-grained personal access token) die alleen in deze browser staat. */
+   Items worden opgeslagen door data/items.json in de repository aan te
+   passen via de GitHub API, met een toegangssleutel (fine-grained token).
 
-const OPSLAG_SLEUTEL = "ldw_instellingen";
+   De beheerder stelt de pagina één keer in met die sleutel en kiest dan
+   een gebruikersnaam + wachtwoord. De sleutel wordt versleuteld met het
+   wachtwoord (AES-GCM, sleutel afgeleid via PBKDF2) en alleen in deze
+   browser bewaard. Daarna is inloggen gewoon: naam + wachtwoord. */
 
-function instellingen() {
-  try { return JSON.parse(localStorage.getItem(OPSLAG_SLEUTEL)) || null; }
+const KLUIS_SLEUTEL = "ldw_kluis";
+const OUD_SLEUTEL = "ldw_instellingen"; // oud formaat met onversleutelde token
+
+let actieveInstellingen = null; // { owner, repo, branch, token } — alleen in geheugen
+
+function instellingen() { return actieveInstellingen; }
+
+function kluis() {
+  try { return JSON.parse(localStorage.getItem(KLUIS_SLEUTEL)) || null; }
   catch { return null; }
 }
 
@@ -32,18 +41,48 @@ function legFoutUit(e) {
   return e.message;
 }
 
-/* ---- base64-hulpjes die met emoji's en accenten overweg kunnen ---- */
+/* ---- base64-hulpjes ---- */
 function utf8NaarB64(str) {
-  const bytes = new TextEncoder().encode(str);
-  let bin = "";
-  for (const b of bytes) bin += String.fromCharCode(b);
-  return btoa(bin);
+  return bytesNaarB64(new TextEncoder().encode(str));
 }
 
 function b64NaarUtf8(b64) {
-  const bin = atob(String(b64).replace(/\s/g, ""));
-  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
-  return new TextDecoder().decode(bytes);
+  return new TextDecoder().decode(b64NaarBytes(String(b64).replace(/\s/g, "")));
+}
+
+function bytesNaarB64(bytes) {
+  let bin = "";
+  for (const b of new Uint8Array(bytes)) bin += String.fromCharCode(b);
+  return btoa(bin);
+}
+
+function b64NaarBytes(b64) {
+  return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+}
+
+/* ---- versleuteling van de toegangssleutel met het wachtwoord ---- */
+async function afgeleideSleutel(wachtwoord, salt) {
+  const basis = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode(wachtwoord), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt, iterations: 310000, hash: "SHA-256" },
+    basis, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+}
+
+async function versleutelToken(token, wachtwoord) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const sleutel = await afgeleideSleutel(wachtwoord, salt);
+  const geheim = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv }, sleutel, new TextEncoder().encode(token));
+  return { salt: bytesNaarB64(salt), iv: bytesNaarB64(iv), geheim: bytesNaarB64(geheim) };
+}
+
+async function ontsleutelToken(k, wachtwoord) {
+  const sleutel = await afgeleideSleutel(wachtwoord, b64NaarBytes(k.salt));
+  const tekst = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: b64NaarBytes(k.iv) }, sleutel, b64NaarBytes(k.geheim));
+  return new TextDecoder().decode(tekst);
 }
 
 /* ---- GitHub API ---- */
@@ -110,40 +149,96 @@ async function uploadFoto(bestand) {
   return pad;
 }
 
-/* ---- Inloggen / uitloggen ---- */
-async function login() {
-  const owner = document.getElementById("in-owner").value.trim();
-  const repo = document.getElementById("in-repo").value.trim();
-  const token = document.getElementById("in-token").value.replace(/\s+/g, "");
-  const branch = document.getElementById("in-branch").value.trim() || "main";
-  if (!owner || !repo || !token) {
-    meld("Vul je gebruikersnaam, de repository én de toegangssleutel in.", "fout");
+/* ---- Eerste keer instellen ---- */
+async function stelIn() {
+  const owner = document.getElementById("su-owner").value.trim();
+  const repo = document.getElementById("su-repo").value.trim();
+  const token = document.getElementById("su-token").value.replace(/\s+/g, "");
+  const branch = document.getElementById("su-branch").value.trim() || "main";
+  const naam = document.getElementById("su-naam").value.trim();
+  const ww1 = document.getElementById("su-ww1").value;
+  const ww2 = document.getElementById("su-ww2").value;
+
+  if (!owner || !repo || !token || !naam) {
+    meld("Vul alle velden in.", "fout");
     return;
   }
-  localStorage.setItem(OPSLAG_SLEUTEL, JSON.stringify({ owner, repo, token, branch }));
-  const knop = document.getElementById("knop-login");
+  if (ww1.length < 8) {
+    meld("Kies een wachtwoord van minstens 8 tekens.", "fout");
+    return;
+  }
+  if (ww1 !== ww2) {
+    meld("De twee wachtwoorden zijn niet hetzelfde.", "fout");
+    return;
+  }
+
+  const knop = document.getElementById("knop-setup");
   knop.disabled = true;
   try {
-    await haalItemsBestand();   // bestaat de repo, werkt de sleutel, en is het items-bestand leesbaar?
+    actieveInstellingen = { owner, repo, branch, token };
+    await haalItemsBestand(); // klopt de sleutel en is de repo bereikbaar?
+
+    const versleuteld = await versleutelToken(token, ww1);
+    localStorage.setItem(KLUIS_SLEUTEL, JSON.stringify({ owner, repo, branch, naam, ...versleuteld }));
+    localStorage.removeItem(OUD_SLEUTEL);
+
     meldWeg();
     toonDashboard();
   } catch (e) {
-    localStorage.removeItem(OPSLAG_SLEUTEL);
-    meld(`Inloggen is niet gelukt. ${legFoutUit(e)}`, "fout");
+    actieveInstellingen = null;
+    meld(`Instellen is niet gelukt. ${legFoutUit(e)}`, "fout");
+  } finally {
+    knop.disabled = false;
+  }
+}
+
+/* ---- Inloggen / uitloggen ---- */
+async function login() {
+  const naam = document.getElementById("in-naam").value.trim();
+  const ww = document.getElementById("in-ww").value;
+  const k = kluis();
+  if (!k) { toonPaneel("setup"); return; }
+
+  const knop = document.getElementById("knop-login");
+  knop.disabled = true;
+  try {
+    let token = null;
+    if (naam.toLowerCase() === String(k.naam).toLowerCase()) {
+      try { token = await ontsleutelToken(k, ww); } catch { token = null; }
+    }
+    if (!token) {
+      meld("De gebruikersnaam of het wachtwoord klopt niet.", "fout");
+      return;
+    }
+    actieveInstellingen = { owner: k.owner, repo: k.repo, branch: k.branch, token };
+    meldWeg();
+    toonDashboard();
   } finally {
     knop.disabled = false;
   }
 }
 
 function uitloggen() {
-  localStorage.removeItem(OPSLAG_SLEUTEL);
+  actieveInstellingen = null;
   location.reload();
 }
 
-/* ---- Dashboard ---- */
+function resetInstellingen() {
+  if (!confirm("Weet je het zeker? Je hebt daarna de GitHub-toegangssleutel weer nodig om opnieuw in te stellen.")) return;
+  localStorage.removeItem(KLUIS_SLEUTEL);
+  localStorage.removeItem(OUD_SLEUTEL);
+  location.reload();
+}
+
+/* ---- Panelen ---- */
+function toonPaneel(welke) {
+  document.getElementById("login-paneel").classList.toggle("verborgen", welke !== "login");
+  document.getElementById("setup-paneel").classList.toggle("verborgen", welke !== "setup");
+  document.getElementById("dashboard").classList.toggle("verborgen", welke !== "dashboard");
+}
+
 function toonDashboard() {
-  document.getElementById("login-paneel").classList.add("verborgen");
-  document.getElementById("dashboard").classList.remove("verborgen");
+  toonPaneel("dashboard");
   ververslijst();
 }
 
@@ -236,15 +331,23 @@ async function opslaan() {
 
 /* ---- Start ---- */
 document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("knop-setup").addEventListener("click", stelIn);
   document.getElementById("knop-login").addEventListener("click", login);
   document.getElementById("knop-uitloggen").addEventListener("click", uitloggen);
   document.getElementById("knop-opslaan").addEventListener("click", opslaan);
+  document.getElementById("link-reset").addEventListener("click", e => {
+    e.preventDefault();
+    resetInstellingen();
+  });
+  document.getElementById("in-ww").addEventListener("keydown", e => {
+    if (e.key === "Enter") login();
+  });
 
-  const s = instellingen();
-  if (s && s.token) {
-    document.getElementById("in-owner").value = s.owner;
-    document.getElementById("in-repo").value = s.repo;
-    document.getElementById("in-branch").value = s.branch;
-    toonDashboard();
+  const k = kluis();
+  if (k) {
+    document.getElementById("in-naam").value = k.naam || "";
+    toonPaneel("login");
+  } else {
+    toonPaneel("setup");
   }
 });
