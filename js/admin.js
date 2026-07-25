@@ -1,0 +1,241 @@
+/* ===== Beheerpagina: praat met de GitHub API om items op te slaan =====
+   De site staat op GitHub Pages (alleen bestanden, geen server).
+   Daarom slaat de beheerpagina items op door data/items.json in de
+   repository aan te passen via de GitHub API, met een toegangssleutel
+   (fine-grained personal access token) die alleen in deze browser staat. */
+
+const OPSLAG_SLEUTEL = "ldw_instellingen";
+
+function instellingen() {
+  try { return JSON.parse(localStorage.getItem(OPSLAG_SLEUTEL)) || null; }
+  catch { return null; }
+}
+
+function meld(tekst, soort) {
+  const el = document.getElementById("melding");
+  el.textContent = tekst;
+  el.className = "melding " + (soort || "ok");
+  el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function meldWeg() {
+  document.getElementById("melding").className = "melding";
+}
+
+/* ---- base64-hulpjes die met emoji's en accenten overweg kunnen ---- */
+function utf8NaarB64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin);
+}
+
+function b64NaarUtf8(b64) {
+  const bin = atob(String(b64).replace(/\s/g, ""));
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+/* ---- GitHub API ---- */
+async function github(pad, opties = {}) {
+  const s = instellingen();
+  const r = await fetch(
+    `https://api.github.com/repos/${s.owner}/${s.repo}/${pad}`,
+    {
+      ...opties,
+      headers: {
+        "Authorization": `Bearer ${s.token}`,
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        ...(opties.headers || {}),
+      },
+    }
+  );
+  if (!r.ok) {
+    let detail = "";
+    try { detail = (await r.json()).message || ""; } catch {}
+    throw new Error(`GitHub zegt: ${r.status} ${detail}`);
+  }
+  return r.json();
+}
+
+async function haalItemsBestand() {
+  const s = instellingen();
+  const bestand = await github(`contents/data/items.json?ref=${encodeURIComponent(s.branch)}`);
+  return { sha: bestand.sha, data: JSON.parse(b64NaarUtf8(bestand.content)) };
+}
+
+async function bewaarItemsBestand(data, sha, bericht) {
+  const s = instellingen();
+  await github("contents/data/items.json", {
+    method: "PUT",
+    body: JSON.stringify({
+      message: bericht,
+      content: utf8NaarB64(JSON.stringify(data, null, 2)),
+      sha,
+      branch: s.branch,
+    }),
+  });
+}
+
+async function uploadFoto(bestand) {
+  const s = instellingen();
+  const b64 = await new Promise((ok, nee) => {
+    const lezer = new FileReader();
+    lezer.onload = () => ok(String(lezer.result).split(",")[1]);
+    lezer.onerror = nee;
+    lezer.readAsDataURL(bestand);
+  });
+  const veiligeNaam = bestand.name.toLowerCase()
+    .replace(/[^a-z0-9.]+/g, "-").replace(/^-+|-+$/g, "");
+  const pad = `fotos/${Date.now().toString(36)}-${veiligeNaam}`;
+  await github(`contents/${pad}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      message: `Foto toegevoegd: ${veiligeNaam}`,
+      content: b64,
+      branch: s.branch,
+    }),
+  });
+  return pad;
+}
+
+/* ---- Inloggen / uitloggen ---- */
+async function login() {
+  const owner = document.getElementById("in-owner").value.trim();
+  const repo = document.getElementById("in-repo").value.trim();
+  const token = document.getElementById("in-token").value.trim();
+  const branch = document.getElementById("in-branch").value.trim() || "main";
+  if (!owner || !repo || !token) {
+    meld("Vul je gebruikersnaam, de repository én de toegangssleutel in.", "fout");
+    return;
+  }
+  localStorage.setItem(OPSLAG_SLEUTEL, JSON.stringify({ owner, repo, token, branch }));
+  const knop = document.getElementById("knop-login");
+  knop.disabled = true;
+  try {
+    await github("");           // bestaat de repo en werkt de sleutel?
+    await haalItemsBestand();   // en kunnen we het items-bestand lezen?
+    meldWeg();
+    toonDashboard();
+  } catch (e) {
+    localStorage.removeItem(OPSLAG_SLEUTEL);
+    meld(`Inloggen is niet gelukt. Controleer de gegevens. (${e.message})`, "fout");
+  } finally {
+    knop.disabled = false;
+  }
+}
+
+function uitloggen() {
+  localStorage.removeItem(OPSLAG_SLEUTEL);
+  location.reload();
+}
+
+/* ---- Dashboard ---- */
+function toonDashboard() {
+  document.getElementById("login-paneel").classList.add("verborgen");
+  document.getElementById("dashboard").classList.remove("verborgen");
+  ververslijst();
+}
+
+async function ververslijst() {
+  const el = document.getElementById("item-lijst");
+  try {
+    const { data } = await haalItemsBestand();
+    const items = (data.items || []).slice()
+      .sort((a, b) => String(b.datum || "").localeCompare(String(a.datum || "")));
+    if (!items.length) {
+      el.innerHTML = "<p>Nog geen items.</p>";
+      return;
+    }
+    el.innerHTML = `<table class="item-lijst">
+      <tr><th>Soort</th><th>Titel</th><th>Datum</th><th></th></tr>
+      ${items.map(i => `<tr>
+        <td>${(TYPES[i.type] || {}).emoji || ""} ${esc((TYPES[i.type] || {}).enkel || i.type)}</td>
+        <td>${esc(i.titel)}</td>
+        <td>${esc(i.datum || "")}</td>
+        <td><button class="knop rood klein" data-verwijder="${esc(i.id)}">Verwijder</button></td>
+      </tr>`).join("")}
+    </table>`;
+    el.querySelectorAll("[data-verwijder]").forEach(k =>
+      k.addEventListener("click", () => verwijderItem(k.dataset.verwijder))
+    );
+  } catch (e) {
+    el.innerHTML = `<p>Kon de lijst niet laden. (${esc(e.message)})</p>`;
+  }
+}
+
+async function verwijderItem(id) {
+  if (!confirm("Weet je zeker dat je dit item wilt verwijderen?")) return;
+  try {
+    const { sha, data } = await haalItemsBestand();
+    const item = (data.items || []).find(i => i.id === id);
+    data.items = (data.items || []).filter(i => i.id !== id);
+    await bewaarItemsBestand(data, sha, `Item verwijderd: ${item ? item.titel : id}`);
+    meld("Item verwijderd! Het duurt een paar minuten voordat de site is bijgewerkt.");
+    ververslijst();
+  } catch (e) {
+    meld(`Verwijderen is niet gelukt. (${e.message})`, "fout");
+  }
+}
+
+async function opslaan() {
+  const knop = document.getElementById("knop-opslaan");
+  const titel = document.getElementById("nw-titel").value.trim();
+  if (!titel) {
+    meld("Geef het item eerst een titel.", "fout");
+    return;
+  }
+  knop.disabled = true;
+  knop.textContent = "Bezig met opslaan…";
+  try {
+    const fotoBestand = document.getElementById("nw-foto-bestand").files[0];
+    let afbeelding = document.getElementById("nw-foto-url").value.trim();
+    if (fotoBestand) afbeelding = await uploadFoto(fotoBestand);
+
+    const dieren = document.getElementById("nw-dieren").value
+      .split(",").map(d => d.trim().toLowerCase()).filter(Boolean);
+
+    const nieuw = {
+      id: Date.now().toString(36),
+      type: document.getElementById("nw-type").value,
+      titel,
+      tekst: document.getElementById("nw-tekst").value.trim(),
+      dieren,
+      afbeelding,
+      video: document.getElementById("nw-video").value.trim(),
+      datum: new Date().toISOString().slice(0, 10),
+    };
+
+    const { sha, data } = await haalItemsBestand();
+    data.items = data.items || [];
+    data.items.unshift(nieuw);
+    await bewaarItemsBestand(data, sha, `Nieuw item: ${titel}`);
+
+    meld("Gelukt! 🎉 Het item is opgeslagen. Binnen een paar minuten staat het op de site.");
+    for (const id of ["nw-titel", "nw-tekst", "nw-dieren", "nw-video", "nw-foto-url"])
+      document.getElementById(id).value = "";
+    document.getElementById("nw-foto-bestand").value = "";
+    ververslijst();
+  } catch (e) {
+    meld(`Opslaan is niet gelukt. (${e.message})`, "fout");
+  } finally {
+    knop.disabled = false;
+    knop.textContent = "Opslaan op de site 🚀";
+  }
+}
+
+/* ---- Start ---- */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("knop-login").addEventListener("click", login);
+  document.getElementById("knop-uitloggen").addEventListener("click", uitloggen);
+  document.getElementById("knop-opslaan").addEventListener("click", opslaan);
+
+  const s = instellingen();
+  if (s && s.token) {
+    document.getElementById("in-owner").value = s.owner;
+    document.getElementById("in-repo").value = s.repo;
+    document.getElementById("in-branch").value = s.branch;
+    toonDashboard();
+  }
+});

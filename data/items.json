@@ -1,0 +1,104 @@
+{
+  "items": [
+    {
+      "id": "voorbeeld-01",
+      "type": "nieuws",
+      "titel": "Welkom op mijn nieuwe website! 🎉",
+      "tekst": "Hoi allemaal! Dit is mijn website over dieren. Ik ga hier super coole weetjes, nieuws, vragen, video's en foto's over dieren plaatsen. Veel plezier!",
+      "dieren": [],
+      "afbeelding": "",
+      "video": "",
+      "datum": "2026-07-25"
+    },
+    {
+      "id": "voorbeeld-02",
+      "type": "weetje",
+      "titel": "Olifanten kunnen niet springen!",
+      "tekst": "De olifant is het enige zoogdier dat écht niet kan springen. Ze zijn veel te zwaar: een volwassen olifant weegt wel 6.000 kilo. Dat is net zoveel als 4 auto's!",
+      "dieren": ["olifant"],
+      "afbeelding": "",
+      "video": "",
+      "datum": "2026-07-25"
+    },
+    {
+      "id": "voorbeeld-03",
+      "type": "weetje",
+      "titel": "Dolfijnen slapen met één oog open",
+      "tekst": "Als een dolfijn slaapt, blijft de helft van zijn hersenen wakker. Zo kan hij blijven ademen én opletten of er gevaar aankomt. Slim hè?",
+      "dieren": ["dolfijn"],
+      "afbeelding": "",
+      "video": "",
+      "datum": "2026-07-24"
+    },
+    {
+      "id": "voorbeeld-04",
+      "type": "weetje",
+      "titel": "Een uil kan zijn kop bijna helemaal ronddraaien",
+      "tekst": "Uilen kunnen hun kop wel 270 graden draaien! Dat moet ook wel, want hun ogen kunnen niet bewegen in hun oogkassen. Daarom draaien ze gewoon hun hele kop.",
+      "dieren": ["uil"],
+      "afbeelding": "",
+      "video": "",
+      "datum": "2026-07-23"
+    },
+    {
+      "id": "voorbeeld-05",
+      "type": "vraag",
+      "titel": "Waarom spinnen katten?",
+      "tekst": "Katten spinnen meestal als ze blij en ontspannen zijn. Maar wist je dat ze soms ook spinnen als ze pijn hebben? Het trillen helpt ze om zichzelf rustig te maken en zelfs om sneller beter te worden!",
+      "dieren": ["kat"],
+      "afbeelding": "",
+      "video": "",
+      "datum": "2026-07-22"
+    },
+    {
+      "id": "voorbeeld-06",
+      "type": "vraag",
+      "titel": "Hoe oud kan een schildpad worden?",
+      "tekst": "Reuzenschildpadden kunnen ouder dan 150 jaar worden! De oudste schildpad ooit heet Jonathan en is meer dan 190 jaar oud. Hij leefde al toen jouw opa's opa nog een baby was.",
+      "dieren": ["schildpad"],
+      "afbeelding": "",
+      "video": "",
+      "datum": "2026-07-21"
+    },
+    {
+      "id": "voorbeeld-07",
+      "type": "foto",
+      "titel": "Een prachtige leeuw op de uitkijk",
+      "tekst": "Kijk eens hoe stoer deze leeuw kijkt! Leeuwen slapen wel 20 uur per dag, maar als ze wakker zijn, zien ze er altijd majestueus uit.",
+      "dieren": ["leeuw"],
+      "afbeelding": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Lion_waiting_in_Namibia.jpg/640px-Lion_waiting_in_Namibia.jpg",
+      "video": "",
+      "datum": "2026-07-20"
+    },
+    {
+      "id": "voorbeeld-08",
+      "type": "foto",
+      "titel": "Dolfijnen zijn de beste springers",
+      "tekst": "Deze dolfijn springt zo uit het water! Dolfijnen kunnen wel 5 meter hoog springen.",
+      "dieren": ["dolfijn"],
+      "afbeelding": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Tursiops_truncatus_01.jpg/640px-Tursiops_truncatus_01.jpg",
+      "video": "",
+      "datum": "2026-07-19"
+    },
+    {
+      "id": "voorbeeld-09",
+      "type": "video",
+      "titel": "De niesende babypanda 🤧",
+      "tekst": "Dit is een van de beroemdste dierenvideo's ooit. Kijk hoe de mama panda schrikt!",
+      "dieren": ["panda"],
+      "afbeelding": "",
+      "video": "https://www.youtube.com/watch?v=FzRH3iTQPrk",
+      "datum": "2026-07-18"
+    },
+    {
+      "id": "voorbeeld-10",
+      "type": "weetje",
+      "titel": "De neus van een hond is uniek",
+      "tekst": "Elke hondenneus heeft een eigen patroon van lijntjes en bobbeltjes, net als een vingerafdruk bij mensen. Er zijn dus geen twee honden met precies dezelfde neus!",
+      "dieren": ["hond"],
+      "afbeelding": "",
+      "video": "",
+      "datum": "2026-07-17"
+    }
+  ]
+}
