@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beheer — Laurens' dieren weetjes</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔑</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-kop">
+    <h1 class="logo"><a href="index.html">🔑 Beheer — Laurens' dieren weetjes</a></h1>
+    <p class="slogan">Alleen voor de beheerder!</p>
+    <nav class="hoofdnav">
+      <a href="index.html">🏠 Terug naar de site</a>
+    </nav>
+  </header>
+
+  <main>
+    <div id="melding" class="melding"></div>
+
+    <!-- ===== Inloggen ===== -->
+    <section id="login-paneel" class="beheer-paneel">
+      <h2>🔐 Inloggen</h2>
+      <p>Vul hieronder de gegevens van je GitHub-account in. Hoe je een
+        toegangssleutel (token) maakt, staat in het bestand <strong>README.md</strong>.</p>
+      <div class="veld">
+        <label for="in-owner">GitHub gebruikersnaam</label>
+        <input type="text" id="in-owner" placeholder="bijv. laurens123">
+      </div>
+      <div class="veld">
+        <label for="in-repo">Naam van de repository</label>
+        <input type="text" id="in-repo" placeholder="bijv. laurens-dieren-weetjes">
+      </div>
+      <div class="veld">
+        <label for="in-token">Toegangssleutel (fine-grained token)</label>
+        <input type="password" id="in-token" placeholder="github_pat_…">
+        <div class="hint">De sleutel wordt alleen op déze computer bewaard (in je browser), nergens anders.</div>
+      </div>
+      <div class="veld">
+        <label for="in-branch">Branch</label>
+        <input type="text" id="in-branch" value="main">
+        <div class="hint">Meestal hoef je dit niet te veranderen.</div>
+      </div>
+      <button class="knop" id="knop-login">Inloggen</button>
+    </section>
+
+    <!-- ===== Dashboard ===== -->
+    <div id="dashboard" class="verborgen">
+
+      <section class="beheer-paneel">
+        <h2>✨ Nieuw item toevoegen</h2>
+        <div class="veld">
+          <label for="nw-type">Soort item</label>
+          <select id="nw-type">
+            <option value="weetje">🤓 Weetje</option>
+            <option value="nieuws">📰 Nieuws</option>
+            <option value="vraag">❓ Vraag</option>
+            <option value="video">🎬 Video</option>
+            <option value="foto">📸 Foto</option>
+          </select>
+        </div>
+        <div class="veld">
+          <label for="nw-titel">Titel</label>
+          <input type="text" id="nw-titel" placeholder="bijv. Olifanten kunnen niet springen!">
+        </div>
+        <div class="veld">
+          <label for="nw-tekst">Tekst</label>
+          <textarea id="nw-tekst" placeholder="Vertel er iets over… (bij een vraag: hier komt het antwoord)"></textarea>
+        </div>
+        <div class="veld">
+          <label for="nw-dieren">Over welke dieren gaat het?</label>
+          <input type="text" id="nw-dieren" placeholder="bijv. olifant, leeuw (met komma's ertussen)">
+          <div class="hint">Elk dier krijgt automatisch een eigen pagina op de site.</div>
+        </div>
+        <div class="veld" id="veld-video">
+          <label for="nw-video">YouTube-link (voor video's)</label>
+          <input type="url" id="nw-video" placeholder="https://www.youtube.com/watch?v=…">
+        </div>
+        <div class="veld">
+          <label for="nw-foto-bestand">Foto uploaden</label>
+          <input type="file" id="nw-foto-bestand" accept="image/*">
+          <div class="hint">Óf plak hieronder een link naar een foto op internet.</div>
+        </div>
+        <div class="veld">
+          <label for="nw-foto-url">Foto-link (internet)</label>
+          <input type="url" id="nw-foto-url" placeholder="https://…jpg">
+        </div>
+        <button class="knop" id="knop-opslaan">Opslaan op de site 🚀</button>
+        <div class="hint" style="margin-top:.5rem">
+          Na het opslaan kan het 1 tot 10 minuten duren voordat het item op de site staat.
+        </div>
+      </section>
+
+      <section class="beheer-paneel">
+        <h2>🗂️ Alle items</h2>
+        <div id="item-lijst">Laden…</div>
+      </section>
+
+      <section class="beheer-paneel">
+        <h2>🚪 Uitloggen</h2>
+        <p>Hiermee wordt de toegangssleutel van deze computer verwijderd.</p>
+        <button class="knop rood" id="knop-uitloggen">Uitloggen</button>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-voet">Laurens' dieren weetjes — beheer</footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

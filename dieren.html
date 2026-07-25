@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alle dieren — Laurens' dieren weetjes</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🦁</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-kop">
+    <h1 class="logo"><a href="index.html">🦁 Laurens' dieren weetjes 🐬</a></h1>
+    <p class="slogan">Voor en door kinderen van 8 tot 10 jaar!</p>
+    <nav class="hoofdnav">
+      <a href="index.html">🏠 Home</a>
+      <a href="categorie.html?type=weetje">🤓 Weetjes</a>
+      <a href="categorie.html?type=nieuws">📰 Nieuws</a>
+      <a href="categorie.html?type=vraag">❓ Vragen</a>
+      <a href="categorie.html?type=video">🎬 Video's</a>
+      <a href="categorie.html?type=foto">📸 Foto's</a>
+      <a href="dieren.html">🐾 Dieren</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1 class="pagina-titel">🐾 Alle dieren</h1>
+    <p>Klik op een dier om alle weetjes, nieuwtjes, vragen, video's en foto's over dat dier te zien!</p>
+    <div id="inhoud" class="dieren-grid"></div>
+  </main>
+
+  <footer class="site-voet">
+    Gemaakt door Laurens 🧡 · <a href="admin.html">Beheer</a>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    (async () => {
+      const el = document.getElementById("inhoud");
+      try {
+        const dieren = verzamelDieren(await laadItems());
+        if (!dieren.length) {
+          el.outerHTML = `<div class="leeg">🐾 Nog geen dieren. Kom snel terug!</div>`;
+          return;
+        }
+        el.innerHTML = dieren.map(([naam, aantal]) => `
+          <a class="dier-tegel" href="dier.html?dier=${encodeURIComponent(naam)}">
+            <span class="emoji">${dierEmoji(naam)}</span>
+            <span class="naam">${esc(hoofdletter(naam))}</span><br>
+            <span class="aantal">${aantal} item${aantal === 1 ? "" : "s"}</span>
+          </a>`).join("");
+      } catch (e) {
+        el.outerHTML = `<div class="leeg">Oeps, er ging iets mis met laden. Probeer het later nog eens!</div>`;
+      }
+    })();
+  </script>
+</body>
+</html>
