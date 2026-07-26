@@ -1,6 +1,18 @@
 {
   "items": [
     {
+      "id": "ms1h72yn",
+      "type": "foto",
+      "titel": "Bob",
+      "tekst": "",
+      "dieren": [
+        "hond"
+      ],
+      "afbeelding": "fotos/ms1h71yi-100-0144.jpg",
+      "video": "",
+      "datum": "2026-07-26"
+    },
+    {
       "id": "ms0hqfq4",
       "type": "vraag",
       "titel": "De Giraf",
