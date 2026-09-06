@@ -1,6 +1,16 @@
 {
   "items": [
     {
+      "id": "mtprlxmj",
+      "type": "nieuws",
+      "titel": "steets meer",
+      "tekst": "er worden elke dag nieuwe items geplaatst",
+      "dieren": [],
+      "afbeelding": "",
+      "video": "",
+      "datum": "2026-09-06"
+    },
+    {
       "id": "mtprjr2z",
       "type": "foto",
       "titel": "jelle",
