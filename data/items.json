@@ -1,6 +1,18 @@
 {
   "items": [
     {
+      "id": "mtprube4",
+      "type": "video",
+      "titel": "natuur",
+      "tekst": "natuur is ook belangerijk.want zonder natuur kunnen de dieren niet leven.dus ook belangerijk",
+      "dieren": [
+        "natuur"
+      ],
+      "afbeelding": "fotos/mtpru9hr-2022-acer-consumer-default-3840x2400.jpg",
+      "video": "",
+      "datum": "2026-09-06"
+    },
+    {
       "id": "mtprqdvx",
       "type": "video",
       "titel": "abel",
