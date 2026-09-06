@@ -1,6 +1,16 @@
 {
   "items": [
     {
+      "id": "mtprz6rn",
+      "type": "nieuws",
+      "titel": "alles",
+      "tekst": "Iedereen mag op de website.Omdat dieren en natuur belangerijk is.En dat komt door mensen,en daarom moeten we het beschermen",
+      "dieren": [],
+      "afbeelding": "",
+      "video": "",
+      "datum": "2026-09-06"
+    },
+    {
       "id": "mtprube4",
       "type": "video",
       "titel": "natuur",
